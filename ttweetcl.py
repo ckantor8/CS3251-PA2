@@ -86,7 +86,7 @@ timeline = []
 
 while True:
     print('$ ')
-    Input = raw_input()
+    Input = str(input())
     if "\"" in Input:
         cmd = Input.split("\"")
         cmd = [c.strip() for c in cmd]
@@ -103,11 +103,13 @@ while True:
         if (cmd[2][0] != '#' or not invalidhashtag(cmd[2]) or "##" in cmd[2] or cmd[2] == "#ALL"):
             print("hashtag illegal format, connection refused.")
             exit() ## exits gracefully
-        s.send(params["user"]+" "+cmd[0]+" "+cmd[1]+" "+cmd[2])
+        s.send((params["user"]+" "+cmd[0]+" "+cmd[1]+" "+cmd[2]).encode())
         res = s.recv(1024)
+        res = res.decode()
         print(res)
         if cmd[2] in mysubs:
             res = s.recv(1024)
+            res = res.decode()
             print(res)
         continue
     
@@ -116,8 +118,9 @@ while True:
             print("operation failed: sub " + cmd[1] + " failed, already exists or exceeds 3 limitation")
             exit() ## exits gracefully
         mysubs.append(cmd[1])
-        s.send((params["user"] + " " + Input))
+        s.send((params["user"] + " " + Input).encode())
         res = s.recv(1024)
+        res = res.decode()
         print(res)
     
     if (cmd[0] == "unsubscribe"):
@@ -126,24 +129,25 @@ while True:
         for subs in mysubs:
             if subs == cmd[1]:
                 mysubs.remove(subs)
-        s.send((params["user"] + " " + Input))
+        s.send((params["user"] + " " + Input).encode())
         res = s.recv(1024)
+        res = res.decode()
         print(res)
     
     if (cmd[0] == "getusers"):
-        s.send(Input)
+        s.send(Input.encode())
         res = s.recv(1024)
         
     if (cmd[0] == "gettweets"):
-        s.send(Input)
+        s.send(Input.encode())
         res = s.recv(1024)
+        res = res.decode()
         print(res)
         
     if (cmd[0] == "exit"):
-        s.send(params["user"]+" "+Input)
+        s.send((params["user"]+" "+Input).encode())
         print("bye bye")
         exit() ## exit gracefully
-    
 s.close()
 
 ####################################################################################################################################

@@ -13,8 +13,8 @@
 import socket
 import sys
 import os
-from thread import *
-import thread
+from _thread import *
+import _thread
 import threading
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) ## Initialize socket
@@ -36,6 +36,7 @@ def multi_threaded_client(connection):
     ##connection.send(str.encode('Server is working:'))
     while True:
         data = connection.recv(2048)
+        data = data.decode()
         if not data:
             break
         if(data.split()[1] == "exit"):
@@ -50,27 +51,27 @@ def multi_threaded_client(connection):
             tweets.append({'user': data.split()[0], 'msg': data.split()[2], 'tag': data.split()[3]})
             for sub in subs:
                 if (data.split()[3] == sub.get("tag")):
-                    sub.get('client').send(data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3])
+                    sub.get('client').send((data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3]).encode())
                 elif (sub.get("tag") == "#ALL"):
-                    sub.get('client').send(data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3])
-            connection.send("tweet operation success")
+                    sub.get('client').send((data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3]).encode())
+            connection.send(("tweet operation success").encode())
         if (data.split()[1] == "subscribe"):
             subs.append({'user': data.split()[0], 'tag': data.split()[2], 'client': connection})
-            connection.send("subscribe operation success")
+            connection.send(("subscribe operation success").encode())
         if (data.split()[1] == "unsubscribe"):
             for sub in subs:
                 if data.split()[2] == sub.get("tag") and data.split()[0] == sub.get("user"):
                     subs.remove(sub)
-            connection.send("unsubscribe operation success")
+            connection.send(("unsubscribe operation success").encode())
         if (data.split()[0] == "gettweets"):
             tweetlist = ""
             for tweet in tweets:
                 if data.split()[1] == tweet.get("user"):
-                    tweetlist = tweetlist+tweet.get("user")+': "'+tweet.get("msg")+" "+tweet.get("tag")+"\n"
+                    tweetlist = tweetlist+tweet.get("user")+': "'+tweet.get("msg")+'" '+tweet.get("tag")+"\n"
             if tweetlist == "":
-                connection.send("no user "+data.split()[1]+" in the system")
+                connection.send(("no user "+data.split()[1]+" in the system").encode())
             else:
-                connection.send(tweetlist)
+                connection.send(tweetlist.encode())
     connection.close()
     
 while True: ## while True will run forever without crashing
