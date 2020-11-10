@@ -38,7 +38,13 @@ def multi_threaded_client(connection):
         data = connection.recv(2048)
         if not data:
             break
-        if(data == "exit"):
+        if(data.split()[1] == "exit"):
+            for tweet in tweets:
+                if data.split()[0] == tweet.get("user"):
+                    tweets.remove(tweet)
+            for sub in subs:
+                if data.split()[0] == sub.get("user"):
+                    subs.remove(sub)
             break
         if (data.split()[1] == "tweet"):
             tweets.append({'user': data.split()[0], 'msg': data.split()[2], 'tag': data.split()[3]})
@@ -56,6 +62,15 @@ def multi_threaded_client(connection):
                 if data.split()[2] == sub.get("tag") and data.split()[0] == sub.get("user"):
                     subs.remove(sub)
             connection.send("unsubscribe operation success")
+        if (data.split()[0] == "gettweets"):
+            tweetlist = ""
+            for tweet in tweets:
+                if data.split()[1] == tweet.get("user"):
+                    tweetlist = tweetlist+tweet.get("user")+': "'+tweet.get("msg")+" "+tweet.get("tag")+"\n"
+            if tweetlist == "":
+                connection.send("no user "+data.split()[1]+" in the system")
+            else:
+                connection.send(tweetlist)
     connection.close()
     
 while True: ## while True will run forever without crashing

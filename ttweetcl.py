@@ -80,7 +80,10 @@ except: ## If connection fails, go to exception handler
 
 print("username legal, connection established.")
 ##res = s.recv(1024)
+
 mysubs = []
+timeline = []
+
 while True:
     print('$ ')
     Input = raw_input()
@@ -128,15 +131,16 @@ while True:
         print(res)
     
     if (cmd[0] == "getusers"):
-        s.send(str.encode(Input))
+        s.send(Input)
         res = s.recv(1024)
         
     if (cmd[0] == "gettweets"):
-        s.send(str.encode(Input))
+        s.send(Input)
         res = s.recv(1024)
+        print(res)
         
     if (cmd[0] == "exit"):
-        s.send(Input)
+        s.send(params["user"]+" "+Input)
         print("bye bye")
         exit() ## exit gracefully
     
