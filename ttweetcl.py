@@ -79,10 +79,12 @@ except: ## If connection fails, go to exception handler
     exit() ## Exit gracefully
 
 print("username legal, connection established.")
-##res = s.recv(1024)
+
 
 mysubs = []
 timeline = []
+
+s.send((params["user"]).encode())
 
 while True:
     print('$ ')
@@ -92,7 +94,7 @@ while True:
         cmd = [c.strip() for c in cmd]
     else:
         cmd = Input.split()
-        
+    
     if (cmd[0] == "tweet"):
         if (len(cmd[1]) <= 0):
             print("message format illegal")
@@ -135,8 +137,10 @@ while True:
         print(res)
     
     if (cmd[0] == "getusers"):
-        s.send(Input.encode())
+        s.send((params["user"]+" "+Input).encode())
         res = s.recv(1024)
+        res = res.decode()
+        print(res)
         
     if (cmd[0] == "gettweets"):
         s.send(Input.encode())

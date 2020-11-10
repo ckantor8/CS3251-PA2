@@ -31,14 +31,25 @@ s.listen(5) ## Set socket to listen for connection
 
 tweets = []
 subs = []
+users = []
 
 def multi_threaded_client(connection):
     ##connection.send(str.encode('Server is working:'))
+    name = connection.recv(1024)
+    name = name.decode()
+    users.append(name)
     while True:
         data = connection.recv(2048)
         data = data.decode()
         if not data:
             break
+        
+        if (data.split()[1] == "getusers"):
+            userlist = ""
+            for user in users:
+                userlist = userlist + user + "\n"
+            connection.send(userlist.encode())
+        
         if(data.split()[1] == "exit"):
             for tweet in tweets:
                 if data.split()[0] == tweet.get("user"):
@@ -46,7 +57,11 @@ def multi_threaded_client(connection):
             for sub in subs:
                 if data.split()[0] == sub.get("user"):
                     subs.remove(sub)
+            for user in users:
+                if data.split()[0] == user:
+                    users.remove(user)
             break
+        
         if (data.split()[1] == "tweet"):
             tweets.append({'user': data.split()[0], 'msg': data.split()[2], 'tag': data.split()[3]})
             for sub in subs:
@@ -55,14 +70,17 @@ def multi_threaded_client(connection):
                 elif (sub.get("tag") == "#ALL"):
                     sub.get('client').send((data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3]).encode())
             connection.send(("tweet operation success").encode())
+        
         if (data.split()[1] == "subscribe"):
             subs.append({'user': data.split()[0], 'tag': data.split()[2], 'client': connection})
             connection.send(("subscribe operation success").encode())
+        
         if (data.split()[1] == "unsubscribe"):
             for sub in subs:
                 if data.split()[2] == sub.get("tag") and data.split()[0] == sub.get("user"):
                     subs.remove(sub)
             connection.send(("unsubscribe operation success").encode())
+        
         if (data.split()[0] == "gettweets"):
             tweetlist = ""
             for tweet in tweets:
