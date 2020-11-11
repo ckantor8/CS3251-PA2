@@ -39,76 +39,86 @@ def multi_threaded_client(connection):
     ##connection.send(str.encode('Server is working:'))
     while True:
         data = connection.recv(2048)
-        data = data.decode()
-        if not data:
+        unsplitdata = data.decode()
+        if not unsplitdata:
             break
         
-        print("data received by the server is ", data)
+        print("data received by the server is ", unsplitdata)
         
-        if (data.split()[1] == "timeline"):
-            connection.send(("Timeline:\n").encode())
+        if "\"" in unsplitdata:
+            data = unsplitdata.split("\"")
+            data = [d.strip() for d in data]
+            data0 = data[0].split()[0]
+            data1 = data[0].split()[1]
+            data.append(data[2])
+            data[3] = data[3].split("#")
+            data[3].remove("")
+            data[2] = data[1]
+            data[1] = data1
+            data[0] = data0
+        else:
+            data = unsplitdata.split()
+        
+        data[1] = data[1].strip(":")
+        
+        if (data[1] == "timeline"):
+            connection.send(("Timeline:").encode())
 
-        if (data.split()[1] == "getusers"):
+        if (data[1] == "getusers"):
             userlist = ""
             for user in users:
                 userlist = userlist + user + "\n"
-            connection.send(userlist.encode())
+            connection.send(userlist.strip().encode())
         
-        if(data.split()[1] == "exit"):
+        if(data[1] == "exit"):
             for tweet in tweets:
-                if data.split()[0] == tweet.get("user"):
+                if data[0] == tweet.get("user"):
                     tweets.remove(tweet)
             for sub in subs:
-                if data.split()[0] == sub.get("user"):
+                if data[0] == sub.get("user"):
                     subs.remove(sub)
             for user in users:
-                if data.split()[0] == user:
+                if data[0] == user:
                     users.remove(user)
             connection.send(("bye bye").encode())
             break
         
-        if (data.split()[1] == "tweet"):
+        if (data[1] == "tweet"):
             #print('data.split()[1] is ', data.split()[1])
-            tweets.append({'user': data.split()[0], 'msg': data.split()[2], 'tag': data.split()[3]})
+            tweets.append({'user': data[0], 'msg': data[2], 'tag': data[3]})
             for sub in subs:
-                tweetMessageToSend = ""
-                for i in range(2, len(data.split()) - 1):
-                    tweetMessageToSend += data.split()[i]
-                    if (i != len(data.split()) - 2):
-                        tweetMessageToSend += " "
-
-                if (data.split()[len(data.split()) - 1] == sub.get("tag")):
-                    sub.get('client').send((data.split()[0] + ': "' + tweetMessageToSend + '" ' + data.split()[len(data.split()) - 1]).encode())
+                if (sub.get("tag") in data[3]):
+                    sub.get('client').send((unsplitdata).encode())
                 elif (sub.get("tag") == "#ALL"):
-                    sub.get('client').send((data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3]).encode())
+                    sub.get('client').send((unsplitdata).encode())
             connection.send(("tweet operation success").encode())
         
-        if (data.split()[1] == "subscribe"):
-            subs.append({'user': data.split()[0], 'tag': data.split()[2], 'client': connection})
+        if (data[1] == "subscribe"):
+            subs.append({'user': data[0], 'tag': data[2].strip("#"), 'client': connection})
             connection.send(("subscribe operation success").encode())
         
-        if (data.split()[1] == "unsubscribe"):
+        if (data[1] == "unsubscribe"):
             for sub in subs:
-                if data.split()[2] == sub.get("tag") and data.split()[0] == sub.get("user"):
+                if data[2] == sub.get("tag") and data[0] == sub.get("user"):
                     subs.remove(sub)
             connection.send(("unsubscribe operation success").encode())
         
-        if (data.split()[0] == "gettweets"):
+        if (data[0] == "gettweets"):
             tweetlist = ""
             for tweet in tweets:
-                if data.split()[1] == tweet.get("user"):
+                if data[1] == tweet.get("user"):
                     tweetlist = tweetlist+tweet.get("user")+': "'+tweet.get("msg")+'" '+tweet.get("tag")+"\n"
             
             userExists = False
             for u in users:
-            	if u == data.split()[1]:
+            	if u == data[1]:
             		userExists = True
             		break
 
             if userExists == False:
-                connection.send(("no user "+data.split()[1]+" in the system").encode())
+                connection.send(("no user "+data[1]+" in the system").encode())
             else:
-                connection.send(tweetlist.encode())
+                connection.send(tweetlist.strip().encode())
         
     connection.close()
 

@@ -54,7 +54,7 @@ if numArgs > 4: ## Too many arguments
     
 if (numArgs == 4): ## No message included, so flag should should be -d
     params = {"ip": args[1], "port": args[2], "user": args[3],} ## Enumerate arguments as parameters
-    print("user = ",params["user"])
+    ##print("user = ",params["user"])
     if (params["ip"] < "0.0.0.0" or params["ip"] > "255.255.255.255"): ## Check if IP is valid
         print("error: server ip invalid, connection refused.") ## Provide error statement
         exit() ## Exit gracefully
@@ -96,7 +96,7 @@ def sending():
         else:
             cmd = Input.split()
         
-        print("cmd:", cmd)
+        ##print("cmd:", cmd)
         
         t2 = 0
         
@@ -111,14 +111,15 @@ def sending():
         if (cmd[0] == "tweet"):
             if (len(cmd[1]) <= 0):
                 print("message format illegal")
-                exit() ## exit gracefully
+                continue ## exit gracefully
             if (len(cmd[1]) > 150):
                 print("message length illegal, connection refused.")
-                exit() ## exit gracefully
+                continue ## exit gracefully
             if (invalidhashtag(cmd[2]) or cmd[2] == "#ALL"):
                 print("hashtag illegal format, connection refused.")
-                exit() ## exits gracefully
-            s.send((params["user"]+" "+cmd[0]+" "+cmd[1]+" "+cmd[2]).encode())
+                continue ## exits gracefully
+            ##print(params["user"]+" "+cmd[0]+" "+cmd[1]+" "+cmd[2])
+            s.send((params["user"]+" "+cmd[0] + ': "' + cmd[1] + '" ' + cmd[2]).encode())
             ##print("Pre-Receive")
             ##res = s.recv(1024)
             ##res = res.decode()
@@ -127,9 +128,10 @@ def sending():
             continue
         
         if (cmd[0] == "subscribe"):
+            ##print(len(mysubs))
             if(len(mysubs) == 3 or cmd[1] in mysubs):
                 print("operation failed: sub " + cmd[1] + " failed, already exists or exceeds 3 limitation")
-                exit() ## exits gracefully
+                continue ## exits gracefully
             mysubs.append(cmd[1])
             s.send((params["user"] + " " + Input).encode())
             """ res = s.recv(1024)
@@ -175,11 +177,11 @@ def receiving(): #listening
             res = res.decode()
             if (': ' in res or ": " in res or "#" in res or '#' in res):
                 ##print("Tweet Caught!")
-                tl.append(res+"\n")
+                tl.append(res)
             if len(res) == 0:
                 pass
             print(res)
-            if (res == "Timeline:\n"):
+            if (res == "Timeline:"):
                 for post in tl:
                     print(post)
 
