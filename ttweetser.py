@@ -51,6 +51,7 @@ def multi_threaded_client(connection):
             data0 = data[0].split()[0]
             data1 = data[0].split()[1]
             data.append(data[2])
+            origintag = data[3]
             data[3] = data[3].split("#")
             data[3].remove("")
             data[2] = data[1]
@@ -85,11 +86,11 @@ def multi_threaded_client(connection):
         
         if (data[1] == "tweet"):
             #print('data.split()[1] is ', data.split()[1])
-            tweets.append({'user': data[0], 'msg': data[2], 'tag': data[3]})
+            tweets.append({'user': data[0], 'msg': data[2], 'tag': origintag})
+            subber = ""
             for sub in subs:
-                if (sub.get("tag") in data[3]):
-                    sub.get('client').send((unsplitdata).encode())
-                elif (sub.get("tag") == "#ALL"):
+                if ((sub.get("tag") == "ALL" or sub.get("tag") in data[3]) and subber != sub.get("user")):
+                    subber = sub.get("user")
                     sub.get('client').send((unsplitdata).encode())
             connection.send(("tweet operation success").encode())
         
@@ -98,9 +99,17 @@ def multi_threaded_client(connection):
             connection.send(("subscribe operation success").encode())
         
         if (data[1] == "unsubscribe"):
-            for sub in subs:
-                if data[2] == sub.get("tag") and data[0] == sub.get("user"):
-                    subs.remove(sub)
+            if (data[2] == "#ALL"):
+                for sub in subs:
+                    if (data[0] == sub.get("user")):
+                        subs.remove(sub)
+                for sub in subs:
+                    if (data[0] == sub.get("user")):
+                        subs.remove(sub)
+            else:
+                for sub in subs:
+                    if ((data[2].strip("#") == sub.get("tag") or data[2].strip("#") == "ALL") and data[0] == sub.get("user")):
+                        subs.remove(sub)
             connection.send(("unsubscribe operation success").encode())
         
         if (data[0] == "gettweets"):
@@ -108,17 +117,11 @@ def multi_threaded_client(connection):
             for tweet in tweets:
                 if data[1] == tweet.get("user"):
                     tweetlist = tweetlist+tweet.get("user")+': "'+tweet.get("msg")+'" '+tweet.get("tag")+"\n"
-            
-            userExists = False
-            for u in users:
-            	if u == data[1]:
-            		userExists = True
-            		break
 
-            if userExists == False:
+            if not (data[1] in users):
                 connection.send(("no user "+data[1]+" in the system").encode())
             else:
-                connection.send(tweetlist.strip().encode())
+                connection.send((tweetlist.strip()+"*").encode())
         
     connection.close()
 

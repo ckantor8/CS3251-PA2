@@ -175,11 +175,13 @@ def receiving(): #listening
         if s:
             res = s.recv(1024)
             res = res.decode()
-            if (': ' in res or ": " in res or "#" in res or '#' in res):
+            if (": " in res and "*" not in res):
                 ##print("Tweet Caught!")
                 tl.append(res)
             if len(res) == 0:
                 pass
+            if "*" in res:
+                res = res.strip("*")
             print(res)
             if (res == "Timeline:"):
                 for post in tl:
