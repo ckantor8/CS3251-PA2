@@ -44,6 +44,9 @@ def multi_threaded_client(connection):
             break
         
         #print("data received by the server is ", data)
+        
+        if (data.split()[1] == "timeline"):
+            connection.send(("Timeline:\n").encode())
 
         if (data.split()[1] == "getusers"):
             userlist = ""
@@ -61,6 +64,7 @@ def multi_threaded_client(connection):
             for user in users:
                 if data.split()[0] == user:
                     users.remove(user)
+            connection.send(("bye bye").encode())
             break
         
         if (data.split()[1] == "tweet"):
@@ -101,6 +105,7 @@ def multi_threaded_client(connection):
                 connection.send(("no user "+data.split()[1]+" in the system").encode())
             else:
                 connection.send(tweetlist.encode())
+        
     connection.close()
 
 while True: ## while True will run forever without crashing

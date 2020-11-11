@@ -13,6 +13,12 @@
 import socket
 import sys
 import re
+import threading
+import _thread
+from _thread import *
+
+##mysubs = []
+tl = []
 
 # Function checks if the string 
 # contains any special character 
@@ -89,79 +95,111 @@ if (validUsername == "False"):
 
 print("username legal, connection established.")
 
-mysubs = []
-timeline = []
-
-while True:
-
-    print('$ ')
-    Input = str(input())
-    if "\"" in Input:
-        cmd = Input.split("\"")
-        cmd = [c.strip() for c in cmd]
-    else:
-        cmd = Input.split()
+def sending():
+    mysubs = []
     
-    print("cmd:", cmd)
+    
+    while True:
 
-    if (cmd[0] == "tweet"):
-        if (len(cmd[1]) <= 0):
-            print("message format illegal")
-            exit() ## exit gracefully
-        if (len(cmd[1]) > 150):
-            print("message length illegal, connection refused.")
-            exit() ## exit gracefully
-        if (invalidhashtag(cmd[2]) or cmd[2] == "#ALL"):
-            print("hashtag illegal format, connection refused.")
-            exit() ## exits gracefully
-        s.send((params["user"]+" "+cmd[0]+" "+cmd[1]+" "+cmd[2]).encode())
-        res = s.recv(1024)
-        res = res.decode()
-        print(res)
-        if cmd[2] in mysubs:
+        ##print('$ ')
+        Input = str(input())
+        if "\"" in Input:
+            cmd = Input.split("\"")
+            cmd = [c.strip() for c in cmd]
+        else:
+            cmd = Input.split()
+        
+        print("cmd:", cmd)
+        
+        t2 = 0
+        
+        if (cmd[0] == "exit"):
+            s.send((params["user"]+" "+Input).encode())
+            ##print("bye bye")
+            break ## exit gracefully
+        
+        t2 = threading.Thread(target=receiving)
+        t2.start()
+
+        if (cmd[0] == "tweet"):
+            if (len(cmd[1]) <= 0):
+                print("message format illegal")
+                exit() ## exit gracefully
+            if (len(cmd[1]) > 150):
+                print("message length illegal, connection refused.")
+                exit() ## exit gracefully
+            if (invalidhashtag(cmd[2]) or cmd[2] == "#ALL"):
+                print("hashtag illegal format, connection refused.")
+                exit() ## exits gracefully
+            s.send((params["user"]+" "+cmd[0]+" "+cmd[1]+" "+cmd[2]).encode())
+            ##print("Pre-Receive")
+            ##res = s.recv(1024)
+            ##res = res.decode()
+            ##print("Post-Receive")
+            ##print(res)
+            continue
+        
+        if (cmd[0] == "subscribe"):
+            if(len(mysubs) == 3 or cmd[1] in mysubs):
+                print("operation failed: sub " + cmd[1] + " failed, already exists or exceeds 3 limitation")
+                exit() ## exits gracefully
+            mysubs.append(cmd[1])
+            s.send((params["user"] + " " + Input).encode())
+            """ res = s.recv(1024)
+            res = res.decode()
+            print(res) """
+        
+        if (cmd[0] == "unsubscribe"):
+            if(cmd[1] == "#ALL"):
+                mysubs = []
+            for subs in mysubs:
+                if subs == cmd[1]:
+                    mysubs.remove(subs)
+            s.send((params["user"] + " " + Input).encode())
+            ##res = s.recv(1024)
+            ##res = res.decode()
+            ##print(res)
+        
+        if (cmd[0] == "getusers"):
+            s.send((params["user"]+" "+Input).encode())
+            ##res = s.recv(1024)
+            ##res = res.decode()
+            ##print(res)
+            
+        if (cmd[0] == "gettweets"):
+            s.send(Input.encode())
+            ##res = s.recv(1024)
+            ##res = res.decode()
+            ##print(res)
+        
+        if (cmd[0] == "timeline"):
+            s.send((params["user"]+" "+Input).encode())
+            
+    ##t2.stop()
+    ##res = s.recv(1024)
+    print("bye bye")
+    s.close()
+    sys.exit()
+
+def receiving():
+    while True:
+        if s:
             res = s.recv(1024)
             res = res.decode()
+            if (': ' in res or ": " in res or "#" in res or '#' in res):
+                ##print("Tweet Caught!")
+                tl.append(res+"\n")
+            if len(res) == 0:
+                pass
             print(res)
-        continue
-    
-    if (cmd[0] == "subscribe"):
-        if(len(mysubs) == 3 or cmd[1] in mysubs):
-            print("operation failed: sub " + cmd[1] + " failed, already exists or exceeds 3 limitation")
-            exit() ## exits gracefully
-        mysubs.append(cmd[1])
-        s.send((params["user"] + " " + Input).encode())
-        res = s.recv(1024)
-        res = res.decode()
-        print(res)
-    
-    if (cmd[0] == "unsubscribe"):
-        if(cmd[1] == "#ALL"):
-            mysubs = []
-        for subs in mysubs:
-            if subs == cmd[1]:
-                mysubs.remove(subs)
-        s.send((params["user"] + " " + Input).encode())
-        res = s.recv(1024)
-        res = res.decode()
-        print(res)
-    
-    if (cmd[0] == "getusers"):
-        s.send((params["user"]+" "+Input).encode())
-        res = s.recv(1024)
-        res = res.decode()
-        print(res)
-        
-    if (cmd[0] == "gettweets"):
-        s.send(Input.encode())
-        res = s.recv(1024)
-        res = res.decode()
-        print(res)
-        
-    if (cmd[0] == "exit"):
-        s.send((params["user"]+" "+Input).encode())
-        print("bye bye")
-        exit() ## exit gracefully
-s.close()
+            if (res == "Timeline:\n"):
+                for post in tl:
+                    print(post)
+
+t1 = threading.Thread(target=sending)
+t1.start()
+
+
 
 ####################################################################################################################################
 #Citation of External References and Templates Used
