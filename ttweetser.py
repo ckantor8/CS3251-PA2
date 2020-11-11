@@ -43,7 +43,7 @@ def multi_threaded_client(connection):
         if not data:
             break
         
-        #print("data received by the server is ", data)
+        print("data received by the server is ", data)
         
         if (data.split()[1] == "timeline"):
             connection.send(("Timeline:\n").encode())
@@ -71,10 +71,14 @@ def multi_threaded_client(connection):
             #print('data.split()[1] is ', data.split()[1])
             tweets.append({'user': data.split()[0], 'msg': data.split()[2], 'tag': data.split()[3]})
             for sub in subs:
-                #print('data.split()[3] is ', data.split()[3])
-                #print('sub.get(tag) is ', sub.get("tag"))
-                if (data.split()[3] == sub.get("tag")):
-                    sub.get('client').send((data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3]).encode())
+                tweetMessageToSend = ""
+                for i in range(2, len(data.split()) - 1):
+                    tweetMessageToSend += data.split()[i]
+                    if (i != len(data.split()) - 2):
+                        tweetMessageToSend += " "
+
+                if (data.split()[len(data.split()) - 1] == sub.get("tag")):
+                    sub.get('client').send((data.split()[0] + ': "' + tweetMessageToSend + '" ' + data.split()[len(data.split()) - 1]).encode())
                 elif (sub.get("tag") == "#ALL"):
                     sub.get('client').send((data.split()[0]+': "'+data.split()[2]+'" '+data.split()[3]).encode())
             connection.send(("tweet operation success").encode())

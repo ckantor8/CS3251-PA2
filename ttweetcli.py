@@ -20,10 +20,7 @@ from _thread import *
 ##mysubs = []
 tl = []
 
-# Function checks if the string 
-# contains any special character 
 def invaliduser(string): 
-  
     # valid ascii range: 48-57 (0 - 9), 65-90 (A - Z), 97-122 (a - z)
     for s in string:
         val = ord(s)
@@ -32,16 +29,6 @@ def invaliduser(string):
     return False
 
 def invalidhashtag(string): 
-  
-    # # Make own character set and pass  
-    # # this as argument in compile method 
-    # regex = re.compile('[@_!$%^&*()<>?/\|}{~:]')    
-    # # Pass the string in search  
-    # # method of regex object.     
-    # if(regex.search(string) == None): 
-    #     return True
-    # else: 
-    #     return False
     if (string[0] != "#" or "##" in string or string == "#ALL"):
         return True
 
@@ -179,9 +166,9 @@ def sending():
     ##res = s.recv(1024)
     print("bye bye")
     s.close()
-    sys.exit()
+    sys.exit()  #shouting
 
-def receiving():
+def receiving(): #listening
     while True:
         if s:
             res = s.recv(1024)
