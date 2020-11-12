@@ -86,11 +86,11 @@ def multi_threaded_client(connection):
                 if ((sub.get("tag") == "ALL" or sub.get("tag") in data[3]) and subber != sub.get("user")):
                     subber = sub.get("user")
                     sub.get('client').send((data[0]+": "+'"'+data[2]+'" '+origintag).encode())
-            connection.send(("tweet operation success").encode())
+            ##connection.send(("tweet operation success").encode())
         
         if (data[1] == "subscribe"):
             subs.append({'user': data[0], 'tag': data[2].strip("#"), 'client': connection})
-            connection.send(("subscribe operation success").encode())
+            connection.send(("operation success").encode())
         
         if (data[1] == "unsubscribe"):
             if (data[2] == "#ALL"):
@@ -104,7 +104,7 @@ def multi_threaded_client(connection):
                 for sub in subs:
                     if ((data[2].strip("#") == sub.get("tag") or data[2].strip("#") == "ALL") and data[0] == sub.get("user")):
                         subs.remove(sub)
-            connection.send(("unsubscribe operation success").encode())
+            connection.send(("operation success").encode())
         
         if (data[0] == "gettweets"):
             tweetlist = ""

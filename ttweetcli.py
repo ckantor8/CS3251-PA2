@@ -20,6 +20,8 @@ from _thread import *
 tl = []
 
 def invaliduser(string): 
+    if string == "":
+        return True
     for s in string:
         val = ord(s)
         if (val < 48 or (val > 57 and val < 65) or (val > 90 and val < 97) or (val > 122)):
