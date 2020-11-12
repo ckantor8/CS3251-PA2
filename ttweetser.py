@@ -1,10 +1,12 @@
 ####################################################################################################################################
 #Information
 ##
-##Names: Cody Kantor, Mark Mossien
+##Name: Cody Kantor
+##GTID: 903412020
+##E-mail: ckantor8@gatech.edu
 ##Class: CS 3251 - Networking I
-##Date: 11/11/2020
-##Assignment: Programming Assignment 2
+##Date: 9/22/2020
+##Assignment: Programming Assignment 1 - Trivial Twitter
 ####################################################################################################################################
 
 ## Necessary imports for socket programming and using terminal arguments
@@ -28,9 +30,9 @@ print("Waiting for connection...") ## Print waiting for connection message to up
 s.listen(5) ## Set socket to listen for connection
 
 tweets = []
-subs = [] #initialize lists for tweets, subs and users
+subs = []
 users = []
-ThreadCount = 0  ## Initialize ThreadCount
+ThreadCount = 0          ## Initialize ThreadCount
 
 def multi_threaded_client(connection): #function for each new thread
     while True: #repeat indefinitely:
@@ -39,9 +41,9 @@ def multi_threaded_client(connection): #function for each new thread
         if not unsplitdata:
             break
                 
-        if "\"" in unsplitdata: 
-            data = unsplitdata.split("\"")
-            data = [d.strip() for d in data]
+        if "\"" in unsplitdata:
+            splitdata = unsplitdata.split("\"")
+            data = [d.strip() for d in splitdata]
             data0 = data[0].split()[0]
             data1 = data[0].split()[1]         #this section parses the code into a list of data[] so that
             data.append(data[2])               #the client's commands can be more easily parsed later in the function.
@@ -51,6 +53,8 @@ def multi_threaded_client(connection): #function for each new thread
             data[2] = data[1]
             data[1] = data1
             data[0] = data0
+            if (splitdata[1].isspace()):
+                data[2] = splitdata[1]
         else:
             data = unsplitdata.split() #if not tweet, then just split by space.
         
@@ -97,7 +101,7 @@ def multi_threaded_client(connection): #function for each new thread
                 for sub in subs:
                     if (data[0] == sub.get("user")):
                         subs.remove(sub)
-            else: 
+            else:
                 for sub in subs: #otherwise, find the specific sub for that user, and unsubscribe from just that hashtag.
                     if ((data[2].strip("#") == sub.get("tag") or data[2].strip("#") == "ALL") and data[0] == sub.get("user")):
                         subs.remove(sub)
@@ -112,7 +116,7 @@ def multi_threaded_client(connection): #function for each new thread
             if not (data[1] in users): #if the user isn't found in the userlist, then there is nothing to display.
                 connection.send(("no user "+data[1]+" in the system").encode()) #let user know
             else: #otherwise, send the user the tweet list for the desired user.
-                connection.send((tweetlist.strip()+"*").encode())
+                connection.send(("G"+tweetlist.strip()).encode())
         
     connection.close() #after the function exists, close the connection.
 
@@ -120,7 +124,7 @@ while True: ## while True will run forever without crashing
     conn, addr = s.accept() ## Accept socket connection
     print('Connected by', addr) ## Print connection information
     
-    name = conn.recv(1024) #receive username information from the client
+    name = conn.recv(2048) #receive username information from the client
     name = name.decode()
     validName = True
     for u in users:

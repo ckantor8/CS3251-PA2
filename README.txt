@@ -36,11 +36,3 @@ project by performing the following:
 	in 1st command line window: python ttweetser.py 10000
 	in 2nd command line window: python ttweetcli.py 143.215.142.530 10000
                   ....
-
-
-                       
-
-
-
-
-
