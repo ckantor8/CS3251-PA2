@@ -17,11 +17,9 @@ import threading
 import _thread
 from _thread import *
 
-##mysubs = []
 tl = []
 
 def invaliduser(string): 
-    # valid ascii range: 48-57 (0 - 9), 65-90 (A - Z), 97-122 (a - z)
     for s in string:
         val = ord(s)
         if (val < 48 or (val > 57 and val < 65) or (val > 90 and val < 97) or (val > 122)):
@@ -54,7 +52,6 @@ if numArgs > 4: ## Too many arguments
     
 if (numArgs == 4): ## No message included, so flag should should be -d
     params = {"ip": args[1], "port": args[2], "user": args[3],} ## Enumerate arguments as parameters
-    ##print("user = ",params["user"])
     if (params["ip"] < "0.0.0.0" or params["ip"] > "255.255.255.255"): ## Check if IP is valid
         print("error: server ip invalid, connection refused.") ## Provide error statement
         exit() ## Exit gracefully
@@ -88,21 +85,17 @@ def sending():
     
     while True:
 
-        ##print('$ ')
         Input = str(input())
         if "\"" in Input:
             cmd = Input.split("\"")
             cmd = [c.strip() for c in cmd]
         else:
             cmd = Input.split()
-        
-        ##print("cmd:", cmd)
-        
+                
         t2 = 0
         
         if (cmd[0] == "exit"):
             s.send((params["user"]+" "+Input).encode())
-            ##print("bye bye")
             break ## exit gracefully
         
         t2 = threading.Thread(target=receiving)
@@ -118,25 +111,15 @@ def sending():
             if (invalidhashtag(cmd[2]) or cmd[2] == "#ALL"):
                 print("hashtag illegal format, connection refused.")
                 continue ## exits gracefully
-            ##print(params["user"]+" "+cmd[0]+" "+cmd[1]+" "+cmd[2])
             s.send((params["user"]+" "+cmd[0] + ': "' + cmd[1] + '" ' + cmd[2]).encode())
-            ##print("Pre-Receive")
-            ##res = s.recv(1024)
-            ##res = res.decode()
-            ##print("Post-Receive")
-            ##print(res)
             continue
         
         if (cmd[0] == "subscribe"):
-            ##print(len(mysubs))
             if(len(mysubs) == 3 or cmd[1] in mysubs):
                 print("operation failed: sub " + cmd[1] + " failed, already exists or exceeds 3 limitation")
                 continue ## exits gracefully
             mysubs.append(cmd[1])
             s.send((params["user"] + " " + Input).encode())
-            """ res = s.recv(1024)
-            res = res.decode()
-            print(res) """
         
         if (cmd[0] == "unsubscribe"):
             if(cmd[1] == "#ALL"):
@@ -145,31 +128,18 @@ def sending():
                 if subs == cmd[1]:
                     mysubs.remove(subs)
             s.send((params["user"] + " " + Input).encode())
-            ##res = s.recv(1024)
-            ##res = res.decode()
-            ##print(res)
         
         if (cmd[0] == "getusers"):
             s.send((params["user"]+" "+Input).encode())
-            ##res = s.recv(1024)
-            ##res = res.decode()
-            ##print(res)
             
         if (cmd[0] == "gettweets"):
             s.send(Input.encode())
-            ##res = s.recv(1024)
-            ##res = res.decode()
-            ##print(res)
         
         if (cmd[0] == "timeline"):
             s.send((params["user"]+" "+Input).encode())
             
-    ##t2.stop()
-    ##res = s.recv(1024)
     print("bye bye")
-    #print("socket before close:", s)
     s.close()
-    #print("socket after close:", s)
     sys.exit()  #shouting
 
 def receiving(): #listening
@@ -179,16 +149,16 @@ def receiving(): #listening
                 res = s.recv(1024)
                 res = res.decode()
                 if (": " in res and "*" not in res):
-                    ##print("Tweet Caught!")
                     tl.append(res)
                 if len(res) == 0:
                     pass
                 if "*" in res:
                     res = res.strip("*")
-                print(res)
                 if (res == "Timeline:"):
                     for post in tl:
                         print(post)
+                else:
+                    print(res)
         except:
             sys.exit()
 

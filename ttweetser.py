@@ -13,10 +13,9 @@
 import socket
 import sys
 import os
-from _thread import *
-
 import _thread
 import threading
+from _thread import *
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) ## Initialize socket
 HOST = ''             ## Symbolic name meaning the local host
@@ -36,14 +35,13 @@ users = []
 ThreadCount = 0          ## Initialize ThreadCount
 
 def multi_threaded_client(connection):
-    ##connection.send(str.encode('Server is working:'))
     while True:
         data = connection.recv(2048)
         unsplitdata = data.decode()
         if not unsplitdata:
             break
         
-        print("data received by the server is ", unsplitdata)
+        #print("data received by the server is ", unsplitdata)
         
         if "\"" in unsplitdata:
             data = unsplitdata.split("\"")
@@ -81,11 +79,9 @@ def multi_threaded_client(connection):
             for user in users:
                 if data[0] == user:
                     users.remove(user)
-            connection.send(("bye bye").encode())
             break
         
         if (data[1] == "tweet"):
-            #print('data.split()[1] is ', data.split()[1])
             tweets.append({'user': data[0], 'msg': data[2], 'tag': origintag})
             subber = ""
             for sub in subs:
@@ -139,15 +135,13 @@ while True: ## while True will run forever without crashing
 
     if (validName):
     	users.append(name)
-    	print("successfully accepted user", name)
+    	#print("successfully accepted user", name)
     	conn.send("True".encode())
     	start_new_thread(multi_threaded_client, (conn, ))
     	ThreadCount = ThreadCount + 1
-    	#print('Thread Number: ' + str(ThreadCount))
     else:
     	conn.send("False".encode())
     	conn.close()
-    
 s.close()
 
 ####################################################################################################################################
