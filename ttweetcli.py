@@ -167,25 +167,32 @@ def sending():
     ##t2.stop()
     ##res = s.recv(1024)
     print("bye bye")
+    #print("socket before close:", s)
     s.close()
+    #print("socket after close:", s)
     sys.exit()  #shouting
 
 def receiving(): #listening
     while True:
-        if s:
-            res = s.recv(1024)
-            res = res.decode()
-            if (": " in res and "*" not in res):
-                ##print("Tweet Caught!")
-                tl.append(res)
-            if len(res) == 0:
-                pass
-            if "*" in res:
-                res = res.strip("*")
-            print(res)
-            if (res == "Timeline:"):
-                for post in tl:
-                    print(post)
+        try:
+            if s:
+                res = s.recv(1024)
+                res = res.decode()
+                if (": " in res and "*" not in res):
+                    ##print("Tweet Caught!")
+                    tl.append(res)
+                if len(res) == 0:
+                    pass
+                if "*" in res:
+                    res = res.strip("*")
+                print(res)
+                if (res == "Timeline:"):
+                    for post in tl:
+                        print(post)
+        except:
+            sys.exit()
+
+
 
 t1 = threading.Thread(target=sending)
 t1.start()
