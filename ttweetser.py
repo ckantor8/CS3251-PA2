@@ -91,7 +91,7 @@ def multi_threaded_client(connection):
             for sub in subs:
                 if ((sub.get("tag") == "ALL" or sub.get("tag") in data[3]) and subber != sub.get("user")):
                     subber = sub.get("user")
-                    sub.get('client').send((unsplitdata).encode())
+                    sub.get('client').send((data[0]+": "+'"'+data[2]+'" '+origintag).encode())
             connection.send(("tweet operation success").encode())
         
         if (data[1] == "subscribe"):
