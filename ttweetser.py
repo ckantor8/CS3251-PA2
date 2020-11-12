@@ -40,9 +40,7 @@ def multi_threaded_client(connection):
         unsplitdata = data.decode()
         if not unsplitdata:
             break
-        
-        #print("data received by the server is ", unsplitdata)
-        
+                
         if "\"" in unsplitdata:
             data = unsplitdata.split("\"")
             data = [d.strip() for d in data]
