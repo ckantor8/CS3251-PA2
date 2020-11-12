@@ -104,7 +104,7 @@ def sending():
         t2.start()
 
         if (cmd[0] == "tweet"):
-            if (len(cmd[1]) <= 0):
+            if (len(cmd[1]) <= 0 and cmd[1] != " "):
                 print("message format illegal")
                 continue ## exit gracefully
             if (len(cmd[1]) > 150):
